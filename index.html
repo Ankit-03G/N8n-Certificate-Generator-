@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Certificate Generator</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.1/fabric.min.js"></script>
+    <style>
+        /* Basic CSS for a clean look */
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #f0f2f5;
+            color: #333;
+            margin: 0;
+            padding: 2rem;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        h1 { text-align: center; color: #1a1a1a; }
+        form { display: flex; gap: 1rem; margin-bottom: 2rem; }
+        input[type="text"] {
+            flex-grow: 1;
+            padding: 0.75rem;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+        button {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            background-color: #007bff;
+            color: white;
+            border-radius: 4px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        button:hover { background-color: #0056b3; }
+        button:disabled { background-color: #aaa; cursor: not-allowed; }
+        .certificates-container { display: grid; gap: 2rem; }
+        .certificate-card {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 1rem;
+            background: #fafafa;
+        }
+        canvas {
+            width: 100%;
+            height: auto;
+            border: 1px dashed #ccc;
+        }
+        pre {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 1rem;
+            border-radius: 4px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            font-size: 0.85rem;
+        }
+        #loader { text-align: center; font-size: 1.2rem; display: none; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>AI Certificate Generator</h1>
+        <form id="generator-form">
+            <input type="text" id="category-input" placeholder="Enter a certificate category (e.g., AI for Farmers)" required>
+            <button type="submit" id="generate-btn">Generate</button>
+        </form>
+
+        <div id="loader">
+            <p>🤖 Generating creative designs... this may take a moment.</p>
+        </div>
+
+        <div id="certificates-container" class="certificates-container">
+            </div>
+    </div>
+
+ <script>
+    console.log('Checkpoint 1: Script has been loaded.');
+
+    // Get references to our HTML elements
+    const form = document.getElementById('generator-form');
+    const categoryInput = document.getElementById('category-input');
+    const generateBtn = document.getElementById('generate-btn');
+    const certificatesContainer = document.getElementById('certificates-container');
+    const loader = document.getElementById('loader');
+
+    console.log('Checkpoint 2: Found button element:', generateBtn);
+
+    // This is the only line you need to change!
+    const n8nWebhookUrl = 'https://ankitakg.app.n8n.cloud/webhook/generate-certificate'; 
+    
+   
+
+    // Listen for a CLICK on the button element
+    if (generateBtn) {
+        console.log('Checkpoint 3: Attaching event listener to button.');
+        generateBtn.addEventListener('click', async (event) => {
+            console.log('Checkpoint 4: Button clicked! Event listener is working.');
+            
+            const category = categoryInput.value;
+            if (!category) {
+                alert('Please enter a category.');
+                return;
+            }
+
+            // --- Show loader and disable button ---
+            loader.style.display = 'block';
+            certificatesContainer.innerHTML = ''; // Clear previous results
+            generateBtn.disabled = true;
+            generateBtn.textContent = 'Generating...';
+
+            console.log('Checkpoint 5: Preparing to call n8n webhook.');
+
+            try {
+                // --- Call the n8n Webhook ---
+                const response = await fetch(n8nWebhookUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ category: category }),
+                });
+                
+                console.log('Checkpoint 6: Received a response from the server.');
+
+                if (!response.ok) {
+                    throw new Error(`Network response was not ok: ${response.statusText}`);
+                }
+
+                const templates = await response.json();
+                
+                console.log('Checkpoint 7: Successfully parsed JSON. Now rendering certificates.');
+
+                // --- Render the certificates ---
+                templates.forEach((template, index) => {
+                    const card = document.createElement('div');
+                    card.className = 'certificate-card';
+                    const canvasId = `canvas-${index}`;
+                    card.innerHTML = `
+                        <h3>Template ${index + 1}</h3>
+                        <canvas id="${canvasId}" width="800" height="565"></canvas>
+                        <h4>Fabric.js JSON Template:</h4>
+                        <pre><code>${JSON.stringify(template, null, 2)}</code></pre>
+                    `;
+                    certificatesContainer.appendChild(card);
+                    const canvas = new fabric.Canvas(canvasId);
+                    canvas.loadFromJSON(template, canvas.renderAll.bind(canvas));
+                });
+
+            } catch (error) {
+                console.error('ERROR FOUND:', error);
+                certificatesContainer.innerHTML = `<p style="color: red;">Failed to generate certificates. Please check the console for details.</p>`;
+            } finally {
+                // --- Hide loader and re-enable button ---
+                loader.style.display = 'none';
+                generateBtn.disabled = false;
+                generateBtn.textContent = 'Generate';
+            }
+        });
+    } else {
+        console.error('CRITICAL ERROR: Could not find the button element with ID "generate-btn".');
+    }
+</script>
