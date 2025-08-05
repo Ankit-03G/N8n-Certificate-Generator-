@@ -1,0 +1,166 @@
+{
+  "name": "My workflow 5",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "generate-certificate",
+        "responseMode": "responseNode",
+        "options": {
+          "allowedOrigins": "*"
+        }
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        0
+      ],
+      "id": "a583bea6-063c-4980-853d-811f4d0f2835",
+      "name": "Webhook",
+      "webhookId": "5a6cf9f5-24bb-415c-9d45-7bd00eb1fbaf"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "e8f7f8e1-bb34-467b-a51c-71b4f8edebd2",
+              "name": "category",
+              "value": "={{ $json.body.category }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        192,
+        0
+      ],
+      "id": "ed6c7e78-69dd-4ef5-bb7c-b190ee838863",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "models/gemini-1.5-flash",
+          "mode": "list",
+          "cachedResultName": "models/gemini-1.5-flash"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=You are an expert graphic designer. Your task is to generate 5 completely unique certificate concepts based on the category: '{{ $('Edit Fields').item.json.category }}'.\n\nThe output MUST be a valid JSON array.\n\nFor each of the 5 concepts, you must provide:\n- \"themeName\": A creative name for the theme.\n- \"fontSuggestions\": An array of two Google Font names.\n- \"chosenIconUrl\": From this list of high-quality icons, pick the ONE URL that best fits the theme: [\n    \"https://cdn.jsdelivr.net/gh/tabler/tabler-icons@latest/icons/award.svg\",\n    \"https://cdn.jsdelivr.net/gh/tabler/tabler-icons@latest/icons/school.svg\",\n    \"https://cdn.jsdelivr.net/gh/tabler/tabler-icons@latest/icons/code.svg\",\n    \"https://cdn.jsdelivr.net/gh/tabler/tabler-icons@latest/icons/plant.svg\",\n    \"https://cdn.jsdelivr.net/gh/tabler/tabler-icons@latest/icons/building-community.svg\",\n    \"https://cdn.jsdelivr.net/gh/tabler/tabler-icons@latest/icons/atom-2.svg\"\n]\n- \"backgroundImageUrl\": From this list of high-quality backgrounds, pick the ONE URL that best fits the theme. Each of the 5 certificates should have a different background. [\n    \"https://images.pexels.com/photos/3408744/pexels-photo-3408744.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1\",\n    \"https://upload.wikimedia.org/wikipedia/commons/4/43/Parchment_old_paper_background.jpg\",\n    \"https://images.pexels.com/photos/417344/pexels-photo-417344.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1\",\n    \"https://images.pexels.com/photos/3184418/pexels-photo-3184418.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1\",\n    \"https://images.pexels.com/photos/1103970/pexels-photo-1103970.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1\"\n]"
+            }
+          ]
+        },
+        "jsonOutput": true,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1,
+      "position": [
+        368,
+        0
+      ],
+      "id": "b63c54db-0e09-418d-b3fd-603fd0ae0337",
+      "name": "Message a model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "QBoEf3N1M5Owlnp6",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "// --- Start of Bulletproof Code ---\n\n// Default assets to use if the AI fails to provide them\nconst DEFAULT_BACKGROUND = 'https://images.pexels.com/photos/1103970/pexels-photo-1103970.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1';\nconst DEFAULT_ICON = 'https://cdn.jsdelivr.net/gh/tabler/tabler-icons@latest/icons/award.svg';\nconst DEFAULT_FONTS = ['Oswald', 'Montserrat'];\n\nlet designs;\n\ntry {\n  // 1. Get the raw text response from the Gemini node.\n  const aiJsonString = $('Message a model').item.json.content.parts[0].text;\n  // 2. Safely parse the text to ensure it's valid JSON.\n  designs = JSON.parse(aiJsonString);\n} catch (error) {\n  // If parsing fails, we create a single, default certificate so you see something.\n  designs = [{}]; \n}\n\n// 3. A final safety check to ensure we have an array.\nif (!Array.isArray(designs)) {\n    // If we don't have an array, create a default one.\n    designs = [{}];\n}\n\nconst categoryName = $('Edit Fields').item.json.category;\n\n// 4. Map over the designs. The rest of the code provides fallbacks for every single property.\nconst fabricTemplates = designs.map((design) => {\n  // Use AI's choice, or fall back to a default if missing.\n  const iconUrl = design.chosenIconUrl || DEFAULT_ICON;\n  const backgroundUrl = design.backgroundImageUrl || DEFAULT_BACKGROUND;\n  const fonts = design.fontSuggestions || DEFAULT_FONTS;\n\n  return {\n    version: \"5.3.0\",\n    backgroundImage: { \"type\": \"image\", \"src\": backgroundUrl },\n    objects: [\n      { \"type\": \"textbox\", \"text\": \"Certificate of Achievement\", \"fontSize\": 48, \"fontWeight\": \"bold\", \"fontFamily\": fonts[0], \"textAlign\": \"center\", \"fill\": \"#FFFFFF\", \"left\": 0, \"top\": 100, \"width\": 800, \"shadow\": \"rgba(0,0,0,0.8) 3px 3px 5px\" },\n      { \"type\": \"textbox\", \"text\": \"This certificate is proudly presented to\", \"fontSize\": 20, \"fontFamily\": fonts[1], \"textAlign\": \"center\", \"fill\": \"#FFFFFF\", \"left\": 0, \"top\": 160, \"width\": 800, \"shadow\": \"rgba(0,0,0,0.8) 2px 2px 3px\" },\n      { \"type\": \"textbox\", \"text\": \"[Participant Name]\", \"fontSize\": 40, \"fontFamily\": fonts[0], \"textAlign\": \"center\", \"fill\": \"#FFFFFF\", \"left\": 0, \"top\": 250, \"width\": 800, \"shadow\": \"rgba(0,0,0,0.8) 3px 3px 5px\" },\n      { \"type\": \"textbox\", \"text\": \"for successfully completing the course on\\n\" + categoryName, \"fontSize\": 22, \"fontFamily\": fonts[1], \"textAlign\": \"center\", \"fill\": \"#FFFFFF\", \"left\": 0, \"top\": 320, \"width\": 800, \"shadow\": \"rgba(0,0,0,0.8) 2px 2px 3px\" },\n      { \"type\": \"textbox\", \"text\": \"Date\\n[Issue Date]\", \"fontSize\": 16, \"fontFamily\": fonts[1], \"textAlign\": \"center\", \"fill\": \"#FFFFFF\", \"left\": 550, \"top\": 450, \"width\": 200, \"shadow\": \"rgba(0,0,0,0.8) 2px 2px 3px\" },\n      { \"type\": \"image\", \"src\": iconUrl, \"left\": 50, \"top\": 420, \"scaleX\": 0.4, \"scaleY\": 0.4 }\n    ]\n  };\n});\n\nreturn fabricTemplates;\n// --- End of Bulletproof Code ---"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        720,
+        0
+      ],
+      "id": "4023d09f-6016-4237-8d4c-d11f8ce47e83",
+      "name": "Code"
+    },
+    {
+      "parameters": {
+        "respondWith": "allIncomingItems",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        880,
+        0
+      ],
+      "id": "dd7a29eb-0cad-42cb-8110-410e5796777a",
+      "name": "Respond to Webhook"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Message a model",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "b279a328-126c-40a5-8a13-66e8a32c8f91",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "72c04a46c8d9da67194384b75230ce1f9f96ea080b44a1a7e51038c0ddb32ac7"
+  },
+  "id": "CZULn6YNpJHVpE0M",
+  "tags": []
+}
