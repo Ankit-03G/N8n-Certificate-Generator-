@@ -6,6 +6,8 @@ The project includes both the powerful n8n automation workflow and a basic HTML/
 
 ---
 
+![Certificate Example 1](./pic1.png) ![Certificate Example 2](./pic2.png) ![Certificate Example 3](./pic3.png)
+
 ## How It Works
 
 The system is split into two parts: the n8n backend and the HTML/JS frontend.
