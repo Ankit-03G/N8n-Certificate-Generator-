@@ -4,19 +4,6 @@ This project is an end-to-end, low-code solution for automatically generating be
 
 The project includes both the powerful n8n automation workflow and a basic HTML/JavaScript front-end to interact with it and display the results.
 
-
-
----
-
-## Features
-
-* **AI-Powered Design:** Leverages the creative power of the Gemini API to generate unique themes, font pairings, and icon suggestions for certificates.
-* **Dynamic Backgrounds:** Automatically fetches high-quality, relevant background images for each certificate, ensuring a visually appealing result.
-* **Low-Code Backend:** The entire automation is built in n8n, making it easy to understand, modify, and extend without extensive coding.
-* **Ready-to-Render Output:** Provides certificate designs in the Fabric.js JSON format, which can be loaded directly onto an HTML canvas.
-* **Simple Web UI:** Includes a basic `index.html` file to demonstrate how to call the workflow and render the generated certificates.
-* **Error-Proof Logic:** The n8n workflow is designed to be resilient, providing a default certificate design even if the AI service fails intermittently.
-
 ---
 
 ## How It Works
@@ -31,8 +18,6 @@ The system is split into two parts: the n8n backend and the HTML/JS frontend.
 6.  A **Code (Function) Node** transforms the AI's creative ideas and the background image URL into a robust Fabric.js JSON structure.
 7.  A **Respond to Webhook Node** sends the final array of 5 JSON templates back to the web UI.
 8.  The JavaScript in the UI receives the JSON and uses the Fabric.js library to render the 5 unique certificates onto the screen.
-
-
 
 ---
 
@@ -95,4 +80,13 @@ Setting up this project is quick and easy.
 
 ---
 
-## Project Structure
+## Features
+
+* **AI-Powered Design:** Leverages the creative power of the Gemini API to generate unique themes, font pairings, and icon suggestions for certificates.
+* **Dynamic Backgrounds:** Automatically fetches high-quality, relevant background images for each certificate, ensuring a visually appealing result.
+* **Low-Code Backend:** The entire automation is built in n8n, making it easy to understand, modify, and extend without extensive coding.
+* **Ready-to-Render Output:** Provides certificate designs in the Fabric.js JSON format, which can be loaded directly onto an HTML canvas.
+* **Simple Web UI:** Includes a basic `index.html` file to demonstrate how to call the workflow and render the generated certificates.
+* **Error-Proof Logic:** The n8n workflow is designed to be resilient, providing a default certificate design even if the AI service fails intermittently.
+
+---
