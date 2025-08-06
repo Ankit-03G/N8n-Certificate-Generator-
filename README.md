@@ -4,6 +4,10 @@ This project is an end-to-end, low-code solution for automatically generating be
 
 The project includes both the powerful n8n automation workflow and a basic HTML/JavaScript front-end to interact with it and display the results.
 
+# Explanation Video 
+
+Video Link - https://drive.google.com/file/d/1ERKdiCnj3xFtg66VvIDR4Qc6wtpAgJp6/view?usp=sharing
+
 ---
 
 ![Certificate Example 1](./pic1.png) ![Certificate Example 2](./pic2.png) ![Certificate Example 3](./pic3.png)
